@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -136,12 +137,15 @@ class MainActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-            android.view.PixelFormat.TRANSLUCENT
+            PixelFormat.TRANSLUCENT
         )
-        val overlay = ScreenOffOverlay(this, prefs.getInt("style", 0)) {
-            runOnUiThread { runCatching { wm.removeView(overlay) } }
+        var overlay: ScreenOffOverlay? = null
+        overlay = ScreenOffOverlay(this, prefs.getInt("style", 0)) {
+            runOnUiThread {
+                overlay?.let { runCatching { wm.removeView(it) } }
+            }
         }
-        wm.addView(overlay, params)
+        wm.addView(overlay!!, params)
     }
 
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
